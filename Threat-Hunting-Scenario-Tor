@@ -1,41 +1,100 @@
 # Threat Event (Unauthorized TOR Usage)
+
 **Unauthorized TOR Browser Installation and Use**
 
 ## Steps the "Bad Actor" took Create Logs and IoCs:
+
 1. Download the TOR browser installer: https://www.torproject.org/download/
-2. Install it silently: ```tor-browser-windows-x86_64-portable-14.0.1.exe /S```
+2. Install it silently: `tor-browser-windows-x86_64-portable-14.0.1.exe /S`
 3. Opens the TOR browser from the folder on the desktop
 4. Connect to TOR and browse a few sites. For example:
-   - Current Dread Forum: ```g66ol3eb5ujdckzqqfmjsbpdjufmjd5nsgdipvxmsh7rckzlhywlzlqd.onion```
-   - Dark Markets Forum: ```g66ol3eb5ujdckzqqfmjsbpdjufmjd5nsgdipvxmsh7rckzlhywlzlqd.onion/d/DarkNetMarkets```
-   - Current Elysium Market: ```elysiumyeudtha62s4oaowwm7ifmnunz3khs4sllhvinphfm4nirfcqd.onion```
-6. Create a folder on your desktop called ```tor-shopping-list.txt``` and put a few fake (illicit) items in there
-7. Delete the file.
+   - Current Dread Forum: `g66ol3eb5ujdckzqqfmjsbpdjufmjd5nsgdipvxmsh7rckzlhywlzlqd.onion`
+   - Dark Markets Forum: `g66ol3eb5ujdckzqqfmjsbpdjufmjd5nsgdipvxmsh7rckzlhywlzlqd.onion/d/DarkNetMarkets`
+   - Current Elysium Market: `elysiumyeudtha62s4oaowwm7ifmnunz3khs4sllhvinphfm4nirfcqd.onion`
+5. Create a folder on your desktop called `tor-shopping-list.txt` and put a few fake (illicit) items in there
+6. Delete the file.
 
 ---
 
 ## Tables Used to Detect IoCs:
-| **Parameter**       | **Description**                                                              |
-|---------------------|------------------------------------------------------------------------------|
-| **Name**| DeviceFileEvents|
-| **Info**|https://learn.microsoft.com/en-us/defender-xdr/advanced-hunting-deviceinfo-table|
-| **Purpose**| Used for detecting TOR download and installation, as well as the shopping list creation and deletion. |
 
-| **Parameter**       | **Description**                                                              |
-|---------------------|------------------------------------------------------------------------------|
-| **Name**| DeviceProcessEvents|
-| **Info**|https://learn.microsoft.com/en-us/defender-xdr/advanced-hunting-deviceinfo-table|
-| **Purpose**| Used to detect the silent installation of TOR as well as the TOR browser and service launching.|
+<table>
+  <thead>
+    <tr>
+      <th>Parameter</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Name</strong></td>
+      <td>DeviceFileEvents</td>
+    </tr>
+    <tr>
+      <td><strong>Info</strong></td>
+      <td>https://learn.microsoft.com/en-us/defender-xdr/advanced-hunting-devicefileevents-table</td>
+    </tr>
+    <tr>
+      <td><strong>Purpose</strong></td>
+      <td>Used for detecting TOR download and installation, as well as the shopping list creation and deletion.</td>
+    </tr>
+  </tbody>
+</table>
 
-| **Parameter**       | **Description**                                                              |
-|---------------------|------------------------------------------------------------------------------|
-| **Name**| DeviceNetworkEvents|
-| **Info**|https://learn.microsoft.com/en-us/defender-xdr/advanced-hunting-devicenetworkevents-table|
-| **Purpose**| Used to detect TOR network activity, specifically tor.exe and firefox.exe making connections over ports to be used by TOR (9001, 9030, 9040, 9050, 9051, 9150).|
+<br>
+
+<table>
+  <thead>
+    <tr>
+      <th>Parameter</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Name</strong></td>
+      <td>DeviceProcessEvents</td>
+    </tr>
+    <tr>
+      <td><strong>Info</strong></td>
+      <td>https://learn.microsoft.com/en-us/defender-xdr/advanced-hunting-deviceprocessevents-table</td>
+    </tr>
+    <tr>
+      <td><strong>Purpose</strong></td>
+      <td>Used to detect the silent installation of TOR as well as the TOR browser and service launching.</td>
+    </tr>
+  </tbody>
+</table>
+
+<br>
+
+<table>
+  <thead>
+    <tr>
+      <th>Parameter</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Name</strong></td>
+      <td>DeviceNetworkEvents</td>
+    </tr>
+    <tr>
+      <td><strong>Info</strong></td>
+      <td>https://learn.microsoft.com/en-us/defender-xdr/advanced-hunting-devicenetworkevents-table</td>
+    </tr>
+    <tr>
+      <td><strong>Purpose</strong></td>
+      <td>Used to detect TOR network activity, specifically <code>tor.exe</code> and <code>firefox.exe</code> making connections over ports used by TOR (9001, 9030, 9040, 9050, 9051, 9150).</td>
+    </tr>
+  </tbody>
+</table>
 
 ---
 
 ## Related Queries:
+
 ```kql
 // Installer name == tor-browser-windows-x86_64-portable-(version).exe
 // Detect the installer being downloaded
@@ -51,12 +110,12 @@ DeviceProcessEvents
 // TOR Browser or service was successfully installed and is present on the disk
 DeviceFileEvents
 | where FileName has_any ("tor.exe", "firefox.exe")
-| project  Timestamp, DeviceName, RequestAccountName, ActionType, InitiatingProcessCommandLine
+| project Timestamp, DeviceName, RequestAccountName, ActionType, InitiatingProcessCommandLine
 
 // TOR Browser or service was launched
 DeviceProcessEvents
 | where ProcessCommandLine has_any("tor.exe","firefox.exe")
-| project  Timestamp, DeviceName, AccountName, ActionType, ProcessCommandLine
+| project Timestamp, DeviceName, AccountName, ActionType, ProcessCommandLine
 
 // TOR Browser or service is being used and is actively creating network connections
 DeviceNetworkEvents
@@ -73,23 +132,42 @@ DeviceFileEvents
 ---
 
 ## Created By:
+
 - **Author Name**: Josh Madakor
 - **Author Contact**: https://www.linkedin.com/in/joshmadakor/
 - **Date**: August 31, 2024
 
 ## Validated By:
-- **Reviewer Name**: 
-- **Reviewer Contact**: 
-- **Validation Date**: 
+
+- **Reviewer Name**:
+- **Reviewer Contact**:
+- **Validation Date**:
 
 ---
 
 ## Additional Notes:
+
 - **None**
 
 ---
 
 ## Revision History:
-| **Version** | **Changes**                   | **Date**         | **Modified By**   |
-|-------------|-------------------------------|------------------|-------------------|
-| 1.0         | Initial draft                  | `September  6, 2024`  | `Josh Madako
+
+<table>
+  <thead>
+    <tr>
+      <th>Version</th>
+      <th>Changes</th>
+      <th>Date</th>
+      <th>Modified By</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1.0</td>
+      <td>Initial draft</td>
+      <td>September 6, 2024</td>
+      <td>Josh Madakor</td>
+    </tr>
+  </tbody>
+</table>
